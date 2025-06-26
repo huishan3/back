@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melody Bean | 後端管理介面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #b58863;
+        }
+        input[type="text"], input[type="number"], input[type="date"], textarea, select {
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box; /* Ensures padding doesn't increase total width */
+        }
+        button {
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-blue { background-color: #4299e1; }
+        .btn-blue:hover { background-color: #3182ce; }
+        .btn-green { background-color: #48bb78; }
+        .btn-green:hover { background-color: #38a169; }
+        .btn-purple { background-color: #805ad5; }
+        .btn-purple:hover { background-color: #6b46c1; }
+        .btn-yellow { background-color: #ecc94b; }
+        .btn-yellow:hover { background-color: #d69e2e; }
+        .btn-red { background-color: #ef4444; }
+        .btn-red:hover { background-color: #dc2626; }
+        .card {
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #fdfdfd;
+        }
+        .item-list li {
+            background-color: #fdfaf5;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-8">
+        <h1 class="text-4xl font-bold mb-8">Melody Bean 後端管理介面</h1>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold mb-6">咖啡豆管理</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h3 class="text-xl font-semibold mb-4">現有咖啡豆列表</h3>
+                <ul id="admin-coffee-list" class="item-list list-none pl-0 space-y-2 mb-4">
+                    <!-- Coffee beans will be listed here -->
+                </ul>
+                <div class="flex gap-2">
+                    <button id="load-coffee-data" class="btn-blue">載入咖啡豆數據</button>
+                    <button id="save-coffee-data" class="btn-green">儲存咖啡豆數據</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-4">新增 / 編輯咖啡豆</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input type="hidden" id="edit-coffee-id">
+                    <input type="text" id="coffee-name" placeholder="名稱" class="p-2 border rounded-md">
+                    <input type="text" id="coffee-flavor" placeholder="風味" class="p-2 border rounded-md">
+                    <input type="number" id="coffee-price" placeholder="售價" class="p-2 border rounded-md">
+                    <input type="date" id="coffee-expiry" placeholder="期限 (YYYY-MM-DD)" class="p-2 border rounded-md">
+                    <input type="text" id="coffee-image" placeholder="圖片URL (placehold.co)" class="p-2 border rounded-md col-span-2">
+                    <textarea id="coffee-lifestyle" placeholder="生活提案" class="p-2 border rounded-md col-span-2"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button id="add-coffee" class="btn-purple">新增咖啡豆</button>
+                    <button id="update-coffee" class="btn-yellow">更新選定咖啡豆</button>
+                    <button id="clear-coffee-form" class="btn-blue">清除表單</button>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-3xl font-semibold mb-6">優惠活動管理</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h3 class="text-xl font-semibold mb-4">現有優惠活動列表</h3>
+                <ul id="admin-offer-list" class="item-list list-none pl-0 space-y-2 mb-4">
+                    <!-- Offers will be listed here -->
+                </ul>
+                <div class="flex gap-2">
+                    <button id="load-offer-data" class="btn-blue">載入優惠數據</button>
+                    <button id="save-offer-data" class="btn-green">儲存優惠數據</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-4">新增 / 編輯優惠</h3>
+                <input type="hidden" id="edit-offer-id">
+                <input type="text" id="offer-name" placeholder="名稱" class="p-2 border rounded-md w-full mb-2">
+                <input type="text" id="offer-description" placeholder="描述" class="p-2 border rounded-md w-full mb-2">
+                <input type="number" id="offer-original-price" placeholder="原價" class="p-2 border rounded-md w-full mb-2">
+                <input type="number" id="offer-special-price" placeholder="特價" class="p-2 border rounded-md w-full mb-4">
+                <input type="text" id="offer-image" placeholder="圖片URL (placehold.co)" class="p-2 border rounded-md w-full mb-4">
+                <div class="flex gap-2">
+                    <button id="add-offer" class="btn-purple">新增優惠</button>
+                    <button id="update-offer" class="btn-yellow">更新選定優惠</button>
+                    <button id="clear-offer-form" class="btn-blue">清除表單</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Local Storage Keys ---
+            const COFFEE_BEANS_KEY = 'melodyCoffeeBeans';
+            const SPECIAL_OFFERS_KEY = 'melodySpecialOffers';
+
+            // --- Default Data (Hardcoded for initial setup if localStorage is empty) ---
+            const defaultCoffeeBeans = [
+                { id: 1, name: '衣索比亞 GEISHA 水洗 (114g)', flavor: '接骨木花、茉莉花、橙花、白玫瑰、百合花、蘋果、野莓果醬、檸檬、百香果', image: 'https://placehold.co/400x250/b58863/FFFFFF?text=衣索比亞+GEISHA+水洗', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '這款咖啡充滿複雜的香氣與明亮的風味，適合在靜謐的午後細細品味，或搭配輕盈的甜點。', salePrice: 280, expiryDate: '2025-10-12' },
+                { id: 2, name: '衣索比亞 Heirloom 雙重厭氧水洗 (227g)', flavor: '茉莉、橙花、蜂蜜、水蜜桃', image: 'https://placehold.co/400x250/3f2e2e/FFFFFF?text=衣索比亞+Heirloom+雙重厭氧', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '甜美而豐富的口感，是開啟美好一天的理想選擇，與早餐糕點搭配尤佳。', salePrice: 600, expiryDate: '2025-10-28' },
+                { id: 3, name: '衣索比亞 Heirloom 雙重厭氧水洗 (227g) - 批次2', flavor: '茉莉、橙花、蜂蜜、水蜜桃', image: 'https://placehold.co/400x250/6b8e23/FFFFFF?text=衣索比亞+Heirloom+批次2', flavorProfile: { acidity: 4, body: 3, sweetness: 5, aroma: 5, finish: 4 }, lifestyle: '相同的風味，不同的採收批次，確保每一杯都有始終如一的甜蜜與芬芳。', salePrice: 600, expiryDate: '2025-10-31' },
+                { id: 4, name: '衣索比亞 GEISHA 中淺焙 (227g)', flavor: '接骨木花、茉莉花、橙花、白玫瑰、百合花、蘋果、野莓果醬、檸檬', image: 'https://placehold.co/400x250/a07654/FFFFFF?text=衣索比亞+GEISHA+中淺焙', flavorProfile: { acidity: 3, body: 3, sweetness: 3, aroma: 4, finish: 3 }, lifestyle: '平衡的風味與較低的酸度，適合日常飲用，無論是搭配閱讀或工作，都能帶來愉悅感受。', salePrice: 540, expiryDate: '2025-11-01' },
+                { id: 5, name: '衣索比亞 GEISHA 水洗 高海拔 (227g)', flavor: '接骨木花、茉莉花、橙花、白玫瑰、百合花、蘋果、野莓果醬、檸檬', image: 'https://placehold.co/400x250/b58863/FFFFFF?text=衣索比亞+GEISHA+高海拔', flavorProfile: { acidity: 4, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '來自高海拔的獨特風味，建議在需要提振精神的早晨品嚐，感受其清晰明亮的層次。', salePrice: 540, expiryDate: '2025-11-01' },
+                { id: 6, name: '衣索比亞 綜合批次 淺焙 (227g)', flavor: '接骨木花、茉莉花、橙花、白玫瑰、百合花、蘋果、野莓果醬、檸檬', image: 'https://placehold.co/400x250/3f2e2e/FFFFFF?text=衣索比亞+綜合淺焙', flavorProfile: { acidity: 4, body: 2, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '輕盈的花果調性，是下午茶時光的完美伴侶，能為您的休憩時刻增添一抹亮色。', salePrice: 540, expiryDate: '2025-11-01' }, 
+                { id: 7, name: '哥斯大黎加 Geisha 白蜜 (114g) - 聖伊西多羅', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', image: 'https://placehold.co/400x250/6b8e23/FFFFFF?text=哥斯大黎加+藝妓', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '此款藝妓咖啡風味精緻優雅，適合在重要時刻或與好友分享，搭配簡約的甜點以突顯其豐富層次。', salePrice: 800, expiryDate: '2025-08-15' }, 
+                { id: 8, name: '哥斯大黎加 藝妓 淺焙 (227g)', flavor: '百合花、野薑花、檸檬草、柑橘、紅色莓果、蜂蜜', image: 'https://placehold.co/400x250/a07654/FFFFFF?text=哥斯大黎加+藝妓+淺焙', flavorProfile: { acidity: 5, body: 3, sweetness: 4, aroma: 5, finish: 4 }, lifestyle: '大容量包裝讓您能更長時間地享受藝妓咖啡的迷人魅力，每日品飲或作為珍貴贈禮皆宜。', salePrice: 1800, expiryDate: '2025-08-15' }
+            ];
+
+            const defaultSpecialOffers = [
+                { id: 101, name: '本月特選：精品咖啡豆組合', description: '嚴選三款不同風味的精品咖啡豆，一次滿足您的味蕾探險。', originalPrice: 1200, specialPrice: 990, image: 'https://placehold.co/400x250/b58863/FFFFFF?text=咖啡組合' }
+            ];
+
+            // --- Data Variables (will be loaded from/saved to localStorage) ---
+            let coffeeBeans = [];
+            let specialOffers = [];
+
+            // --- DOM Elements ---
+            const adminCoffeeList = document.getElementById('admin-coffee-list');
+            const loadCoffeeBtn = document.getElementById('load-coffee-data');
+            const saveCoffeeBtn = document.getElementById('save-coffee-data');
+            const addCoffeeBtn = document.getElementById('add-coffee');
+            const updateCoffeeBtn = document.getElementById('update-coffee');
+            const clearCoffeeFormBtn = document.getElementById('clear-coffee-form');
+
+            const editCoffeeIdInput = document.getElementById('edit-coffee-id');
+            const coffeeNameInput = document.getElementById('coffee-name');
+            const coffeeFlavorInput = document.getElementById('coffee-flavor');
+            const coffeePriceInput = document.getElementById('coffee-price');
+            const coffeeExpiryInput = document.getElementById('coffee-expiry');
+            const coffeeImageInput = document.getElementById('coffee-image');
+            const coffeeLifestyleInput = document.getElementById('coffee-lifestyle');
+
+            const adminOfferList = document.getElementById('admin-offer-list');
+            const loadOfferBtn = document.getElementById('load-offer-data');
+            const saveOfferBtn = document.getElementById('save-offer-data');
+            const addOfferBtn = document.getElementById('add-offer');
+            const updateOfferBtn = document.getElementById('update-offer');
+            const clearOfferFormBtn = document.getElementById('clear-offer-form');
+
+            const editOfferIdInput = document.getElementById('edit-offer-id');
+            const offerNameInput = document.getElementById('offer-name');
+            const offerDescriptionInput = document.getElementById('offer-description');
+            const offerOriginalPriceInput = document.getElementById('offer-original-price');
+            const offerSpecialPriceInput = document.getElementById('offer-special-price');
+            const offerImageInput = document.getElementById('offer-image');
+
+            // --- Helper Functions ---
+
+            /**
+             * Generates a simple pseudo-unique ID.
+             * In a real app, use UUIDs or backend-generated IDs.
+             */
+            function generateId() {
+                return Date.now() + Math.floor(Math.random() * 1000);
+            }
+
+            // --- Coffee Bean Functions ---
+            function renderCoffeeBeansAdmin() {
+                adminCoffeeList.innerHTML = '';
+                if (coffeeBeans.length === 0) {
+                    adminCoffeeList.innerHTML = '<li>目前沒有咖啡豆數據。</li>';
+                    return;
+                }
+                coffeeBeans.forEach(bean => {
+                    const listItem = document.createElement('li');
+                    listItem.dataset.id = bean.id;
+                    listItem.innerHTML = `
+                        <span>${bean.name} (NT$${bean.salePrice}) - ${bean.flavor}</span>
+                        <div>
+                            <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-coffee-btn">編輯</button>
+                            <button class="btn-red text-sm py-1 px-2 delete-coffee-btn">刪除</button>
+                        </div>
+                    `;
+                    adminCoffeeList.appendChild(listItem);
+                });
+
+                // Attach event listeners for edit and delete
+                document.querySelectorAll('.edit-coffee-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.closest('li').dataset.id;
+                        const beanToEdit = coffeeBeans.find(b => b.id == id);
+                        if (beanToEdit) {
+                            editCoffeeIdInput.value = beanToEdit.id;
+                            coffeeNameInput.value = beanToEdit.name;
+                            coffeeFlavorInput.value = beanToEdit.flavor;
+                            coffeePriceInput.value = beanToEdit.salePrice;
+                            coffeeExpiryInput.value = beanToEdit.expiryDate;
+                            coffeeImageInput.value = beanToEdit.image;
+                            coffeeLifestyleInput.value = beanToEdit.lifestyle;
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.delete-coffee-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = parseInt(e.target.closest('li').dataset.id);
+                        if (confirm('確定要刪除此咖啡豆嗎？')) { // Using confirm for simplicity in admin panel
+                            coffeeBeans = coffeeBeans.filter(bean => bean.id !== id);
+                            saveCoffeeBeans(); // Save immediately after delete
+                            renderCoffeeBeansAdmin();
+                            clearCoffeeForm();
+                        }
+                    });
+                });
+            }
+
+            function loadCoffeeBeans() {
+                let storedBeans = JSON.parse(localStorage.getItem(COFFEE_BEANS_KEY));
+                if (Array.isArray(storedBeans) && storedBeans.length > 0) {
+                    coffeeBeans = storedBeans;
+                } else {
+                    coffeeBeans = [...defaultCoffeeBeans]; // Use spread to avoid modifying default array directly
+                }
+                renderCoffeeBeansAdmin();
+                clearCoffeeForm();
+                console.log('Coffee beans loaded (Admin).');
+            }
+
+            function saveCoffeeBeans() {
+                localStorage.setItem(COFFEE_BEANS_KEY, JSON.stringify(coffeeBeans));
+                console.log('Coffee beans saved (Admin).');
+            }
+
+            function clearCoffeeForm() {
+                editCoffeeIdInput.value = '';
+                coffeeNameInput.value = '';
+                coffeeFlavorInput.value = '';
+                coffeePriceInput.value = '';
+                coffeeExpiryInput.value = '';
+                coffeeImageInput.value = '';
+                coffeeLifestyleInput.value = '';
+            }
+
+            // --- Special Offer Functions ---
+            function renderSpecialOffersAdmin() {
+                adminOfferList.innerHTML = '';
+                if (specialOffers.length === 0) {
+                    adminOfferList.innerHTML = '<li>目前沒有優惠活動數據。</li>';
+                    return;
+                }
+                specialOffers.forEach(offer => {
+                    const listItem = document.createElement('li');
+                    listItem.dataset.id = offer.id;
+                    listItem.innerHTML = `
+                        <span>${offer.name} (NT$${offer.specialPrice})</span>
+                        <div>
+                            <button class="btn-yellow text-sm py-1 px-2 mr-1 edit-offer-btn">編輯</button>
+                            <button class="btn-red text-sm py-1 px-2 delete-offer-btn">刪除</button>
+                        </div>
+                    `;
+                    adminOfferList.appendChild(listItem);
+                });
+
+                // Attach event listeners for edit and delete
+                document.querySelectorAll('.edit-offer-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.closest('li').dataset.id;
+                        const offerToEdit = specialOffers.find(o => o.id == id);
+                        if (offerToEdit) {
+                            editOfferIdInput.value = offerToEdit.id;
+                            offerNameInput.value = offerToEdit.name;
+                            offerDescriptionInput.value = offerToEdit.description;
+                            offerOriginalPriceInput.value = offerToEdit.originalPrice;
+                            offerSpecialPriceInput.value = offerToEdit.specialPrice;
+                            offerImageInput.value = offerToEdit.image;
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.delete-offer-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = parseInt(e.target.closest('li').dataset.id);
+                        if (confirm('確定要刪除此優惠嗎？')) { // Using confirm for simplicity in admin panel
+                            specialOffers = specialOffers.filter(offer => offer.id !== id);
+                            saveSpecialOffers(); // Save immediately after delete
+                            renderSpecialOffersAdmin();
+                            clearOfferForm();
+                        }
+                    });
+                });
+            }
+
+            function loadSpecialOffers() {
+                let storedOffers = JSON.parse(localStorage.getItem(SPECIAL_OFFERS_KEY));
+                if (Array.isArray(storedOffers) && storedOffers.length > 0) {
+                    specialOffers = storedOffers;
+                } else {
+                    specialOffers = [...defaultSpecialOffers]; // Use spread to avoid modifying default array directly
+                }
+                renderSpecialOffersAdmin();
+                clearOfferForm();
+                console.log('Special offers loaded (Admin).');
+            }
+
+            function saveSpecialOffers() {
+                localStorage.setItem(SPECIAL_OFFERS_KEY, JSON.stringify(specialOffers));
+                console.log('Special offers saved (Admin).');
+            }
+
+            function clearOfferForm() {
+                editOfferIdInput.value = '';
+                offerNameInput.value = '';
+                offerDescriptionInput.value = '';
+                offerOriginalPriceInput.value = '';
+                offerSpecialPriceInput.value = '';
+                offerImageInput.value = '';
+            }
+
+            // --- Event Listeners ---
+
+            // Coffee Bean Event Listeners
+            loadCoffeeBtn.addEventListener('click', loadCoffeeBeans);
+            saveCoffeeBtn.addEventListener('click', saveCoffeeBeans);
+
+            addCoffeeBtn.addEventListener('click', () => {
+                const newBean = {
+                    id: generateId(), // Simple ID generation
+                    name: coffeeNameInput.value,
+                    flavor: coffeeFlavorInput.value,
+                    salePrice: parseFloat(coffeePriceInput.value) || 0,
+                    expiryDate: coffeeExpiryInput.value,
+                    image: coffeeImageInput.value || 'https://placehold.co/400x250/cccccc/333333?text=新咖啡豆',
+                    flavorProfile: { acidity: 3, body: 3, sweetness: 3, aroma: 3, finish: 3 }, // Default profile
+                    lifestyle: coffeeLifestyleInput.value || '享受一杯美好的咖啡。'
+                };
+                coffeeBeans.push(newBean);
+                saveCoffeeBeans();
+                renderCoffeeBeansAdmin();
+                clearCoffeeForm();
+            });
+
+            updateCoffeeBtn.addEventListener('click', () => {
+                const idToUpdate = parseInt(editCoffeeIdInput.value);
+                const beanIndex = coffeeBeans.findIndex(bean => bean.id === idToUpdate);
+                if (beanIndex !== -1) {
+                    coffeeBeans[beanIndex] = {
+                        ...coffeeBeans[beanIndex], // Keep existing properties
+                        name: coffeeNameInput.value,
+                        flavor: coffeeFlavorInput.value,
+                        salePrice: parseFloat(coffeePriceInput.value) || 0,
+                        expiryDate: coffeeExpiryInput.value,
+                        image: coffeeImageInput.value || coffeeBeans[beanIndex].image,
+                        lifestyle: coffeeLifestyleInput.value
+                    };
+                    saveCoffeeBeans();
+                    renderCoffeeBeansAdmin();
+                    clearCoffeeForm();
+                } else {
+                    alert('請選擇要更新的咖啡豆。');
+                }
+            });
+
+            clearCoffeeFormBtn.addEventListener('click', clearCoffeeForm);
+
+            // Special Offer Event Listeners
+            loadOfferBtn.addEventListener('click', loadSpecialOffers);
+            saveOfferBtn.addEventListener('click', saveSpecialOffers);
+
+            addOfferBtn.addEventListener('click', () => {
+                const newOffer = {
+                    id: generateId(), // Simple ID generation
+                    name: offerNameInput.value,
+                    description: offerDescriptionInput.value,
+                    originalPrice: parseFloat(offerOriginalPriceInput.value) || 0,
+                    specialPrice: parseFloat(offerSpecialPriceInput.value) || 0,
+                    image: offerImageInput.value || 'https://placehold.co/400x250/cccccc/333333?text=新優惠'
+                };
+                specialOffers.push(newOffer);
+                saveSpecialOffers();
+                renderSpecialOffersAdmin();
+                clearOfferForm();
+            });
+
+            updateOfferBtn.addEventListener('click', () => {
+                const idToUpdate = parseInt(editOfferIdInput.value);
+                const offerIndex = specialOffers.findIndex(offer => offer.id === idToUpdate);
+                if (offerIndex !== -1) {
+                    specialOffers[offerIndex] = {
+                        ...specialOffers[offerIndex], // Keep existing properties
+                        name: offerNameInput.value,
+                        description: offerDescriptionInput.value,
+                        originalPrice: parseFloat(offerOriginalPriceInput.value) || 0,
+                        specialPrice: parseFloat(offerSpecialPriceInput.value) || 0,
+                        image: offerImageInput.value || specialOffers[offerIndex].image
+                    };
+                    saveSpecialOffers();
+                    renderSpecialOffersAdmin();
+                    clearOfferForm();
+                } else {
+                    alert('請選擇要更新的優惠活動。');
+                }
+            });
+
+            clearOfferFormBtn.addEventListener('click', clearOfferForm);
+
+
+            // Initial load for admin panel when opened
+            loadCoffeeBeans();
+            loadSpecialOffers();
+        });
+    </script>
+</body>
+</html>
